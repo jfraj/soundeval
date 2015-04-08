@@ -1,1 +1,2 @@
-A project to learn good sound
+# soundeval
+evaluating music sounds
