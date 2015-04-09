@@ -5,7 +5,11 @@ import numpy as np
 import essentia.standard as ess
 from essentia.standard import MonoLoader
 from essentia.standard import Centroid, Spectrum, Windowing
-get_onsets = ess.OnsetRate()
+#get_onsets = ess.OnsetRate()
+centroid = Centroid(range=22050)
+hamming_window = Windowing(type='hamming')
+zcr = ess.ZeroCrossingRate()
+spectrum = ess.Spectrum()
 
 ## Classifier and feature processing
 from sklearn import preprocessing
@@ -33,11 +37,13 @@ class audio_sample():
         self.onset_times = None ## In seconds
         self.onset_samples = None ## As sample number in the audio sampling
         self.strokes = None
+        self.stroke_df = None
         
     def find_onsets(self):
         """
         Get the starting of each strokes
         """
+        get_onsets = ess.OnsetRate()
         self.onset_times, onset_rate = get_onsets(self.audio)## onset_times is np array
         print '\n\n\n !!!!!!!!!!!\n TO DO: exclude signals that are less than a stroke length away!!!\n\n\n'
         ## Onset as sample number in the audio signal
@@ -51,9 +57,20 @@ class audio_sample():
         ## Defining the frame to contain the strokes
         frame_sz = int(self.stroke_length*self.sampling_rate)
         self.strokes = np.array([self.audio[i:i+frame_sz] for i in self.onset_samples])
-        print self.strokes
-        print self.strokes.shape
+        
+    def extract_features_from_frame(self, frame):
+        if len(frame)%2 == 1:## Spectrum can only compute FFT of array with even size (don't know why)
+            frame = frame[:-1]
+        spectral_magnitude = spectrum(hamming_window(frame))
+        return [zcr(frame), centroid(spectral_magnitude)]
 
+    def get_features(self):
+        """
+        Returns a feature table from the strokes
+        """
+        #print self.strokes
+        feature_table = np.array([self.extract_features_from_frame(stroke) for stroke in self.strokes])
+        return feature_table
         
     def show_signal(self):
         """
@@ -77,7 +94,10 @@ class audio_sample():
         raw_input('press enter when finished...')
 
 if __name__=='__main__':
-    testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/marina.m4a')
-    #testaudio.show_signal()
-    testaudio.isolate_strokes()
-    testaudio.show_strokes()
+    #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/marina.m4a')
+    testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/jfraj.m4a')
+    testaudio.show_signal()
+    #testaudio.isolate_strokes()
+    #testaudio.show_strokes()
+    #testaudio.get_features()
+
