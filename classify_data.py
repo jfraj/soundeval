@@ -5,6 +5,7 @@ import pandas as pd
 import stroke_cleaning
 import itertools
 
+
 def show_features_from_list(audio_list):
     """
     """
@@ -16,21 +17,25 @@ def show_features_from_list(audio_list):
         iaudio.isolate_strokes()
         ifeatures = iaudio.get_features()
         del(iaudio)
-        plt.scatter(ifeatures[:, 0], ifeatures[:, 1],color=next(colors), s=70)
+        plt.scatter(ifeatures[:, 0], ifeatures[:, 1], color=next(colors), s=70)
     plt.grid()
     fig.show()
     raw_input('press enter when finished...')
+
 
 def get_features_from_file(audio_file):
     audio = stroke_cleaning.audio_sample(audio_file)
     return pd.DataFrame(audio.get_features())
 
+
 def get_df_from_list(audio_files):
     """
-    Will returns a data frame filled with the features from audio files from the list
+    Will return a data frame
+    filled with the features from audio files from the list
     """
-    frames = [ get_features_from_file(f) for f in audio_files ]
+    frames = [get_features_from_file(f) for f in audio_files]
     return pd.concat(frames)
+
 
 def main():
     """
@@ -56,12 +61,7 @@ def main():
     print df2
     df = pd.concat([df1,df2])
 
-    print df 
+    print df
 
 if __name__ == '__main__':
     sys.exit(main())
-    #recording_list = (
-    #    '/Users/jean-francoisrajotte/myaudio/marina.m4a',
-    #    '/Users/jean-francoisrajotte/myaudio/jfraj.m4a',
-    #    )
-    #show_features_from_list(recording_list)
