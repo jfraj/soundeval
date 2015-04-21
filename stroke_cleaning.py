@@ -21,7 +21,7 @@ class audio_sample():
     """
     Contain an audio data and methods to clean it and extract feature
     """
-    def __init__(self, audio_fname):
+    def __init__(self, audio_fname, good_range=None):
         """
         Loads the audio file and make the features
         """
@@ -33,6 +33,11 @@ class audio_sample():
         self.audio_fname = audio_fname
         # Following is an audio signal sampled in 44100Hz (essentia default)
         self.audio = MonoLoader(filename=audio_fname)()
+
+        # Cleaning edges
+        if good_range is None:
+            good_range = (0, len(self.audio))
+        self.audio = self.audio[good_range[0]:good_range[1]]
 
         # Some parameter that will be defined by signal processing
         self.onset_times = False  # In seconds
@@ -123,7 +128,8 @@ class audio_sample():
 
 if __name__=='__main__':
     #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/marina.m4a')
-    testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/jfraj.m4a')
+    testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/jfraj.m4a',
+        (95000, -400000))
     #testaudio.show_signal()
     testaudio.isolate_strokes()
     testaudio.show_signal()
