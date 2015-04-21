@@ -1,27 +1,7 @@
 """Script to classify a list of audio samples"""
 import sys
-import matplotlib.pyplot as plt
 import pandas as pd
 import stroke_cleaning
-import itertools
-
-
-def show_features_from_list(audio_list):
-    """
-    """
-    fig = plt.figure()
-    features_dict = {}
-    colors = itertools.cycle(["r", "b", "g"])
-    for iaudiofile in audio_list:
-        iaudio = stroke_cleaning.audio_sample(iaudiofile)
-        iaudio.isolate_strokes()
-        ifeatures = iaudio.get_features()
-        del(iaudio)
-        plt.scatter(ifeatures[:, 0], ifeatures[:, 1], color=next(colors), s=70)
-    plt.grid()
-    fig.show()
-    raw_input('press enter when finished...')
-
 
 def get_features_from_file(audio_file):
     audio = stroke_cleaning.audio_sample(audio_file)

@@ -128,8 +128,9 @@ class audio_sample():
 
 if __name__=='__main__':
     #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/marina.m4a')
-    testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/jfraj.m4a',
-        (95000, -400000))
+    #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/jfraj.m4a',(95000, -400000))
+    testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/astring_shoulder_rest_ON.m4a')
+
     #testaudio.show_signal()
     testaudio.isolate_strokes()
     testaudio.show_signal()
