@@ -83,7 +83,8 @@ class audio_sample():
         if len(frame) % 2 == 1:
             frame = frame[:-1]
         spectral_magnitude = spectrum(hamming_window(frame))
-        return [zcr(frame), centroid(spectral_magnitude)]
+        #return [zcr(frame), centroid(spectral_magnitude)]
+        return {'zrc':zcr(frame), 'centroid':centroid(spectral_magnitude)}
 
     def get_features(self):
         """
@@ -91,9 +92,18 @@ class audio_sample():
         """
         if self.strokes is False:
             self.isolate_strokes()
-        feature_table = np.array(
-            [self.extract_features_from_frame(stroke) for stroke in self.strokes])
-        return feature_table
+        #feature_table = np.array(
+        #    [self.extract_features_from_frame(stroke) for stroke in self.strokes])
+        feature_names = ('zrc', 'centroid')
+        features_list = []
+        for istroke in self.strokes:
+            ifeature_dic = self.extract_features_from_frame(istroke)
+            ifeature_list = []
+            for ifeature in feature_names:
+                ifeature_list.append(ifeature_dic[ifeature])
+            features_list.append(ifeature_list)
+        return {'feature_names': feature_names,
+                'feature_table': np.array(features_list)}
 
     def show_signal(self):
         """
@@ -129,10 +139,13 @@ class audio_sample():
 if __name__=='__main__':
     #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/marina.m4a')
     #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/jfraj.m4a',(95000, -400000))
-    testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/astring_shoulder_rest_ON.m4a')
+    #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/astring_shoulder_rest_ON.m4a')
+    #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/astring_shoulder_rest_ON.m4a')
+    #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/sustainedG_shoulder_rest_ON.m4a')
+    testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/sustainedG_shoulder_rest_OFF.m4a')
 
     #testaudio.show_signal()
-    testaudio.isolate_strokes()
-    testaudio.show_signal()
+    #testaudio.isolate_strokes()
+    #testaudio.show_signal()
     #testaudio.show_strokes()
-    #testaudio.get_features()
+    print testaudio.get_features()

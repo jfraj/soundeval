@@ -3,9 +3,12 @@ import sys
 import pandas as pd
 import stroke_cleaning
 
+
 def get_features_from_file(audio_file):
     audio = stroke_cleaning.audio_sample(audio_file)
-    return pd.DataFrame(audio.get_features())
+    feature_dic = audio.get_features()
+    return pd.DataFrame(feature_dic['feature_table'],
+                        columns=feature_dic['feature_names'])
 
 
 def get_df_from_list(audio_files):
@@ -14,7 +17,7 @@ def get_df_from_list(audio_files):
     filled with the features from audio files from the list
     """
     frames = [get_features_from_file(f) for f in audio_files]
-    return pd.concat(frames)
+    return pd.concat(frames, ignore_index=True)
 
 
 def main():
@@ -39,7 +42,7 @@ def main():
     df2 = get_df_from_list(list2)
     df2['player'] = 2
     print df2
-    df = pd.concat([df1,df2])
+    df = pd.concat([df1,df2], ignore_index=True)
 
     print df
 
