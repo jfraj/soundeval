@@ -34,6 +34,8 @@ class audio_sample():
         # Some parameters
         self.sampling_rate = 44100  # This is essentia's default
         self.stroke_length = kwargs.get('stroke_length', 0.5)  # In seconds
+        self.clip_start = kwargs.get('clip_start', True)  # In seconds
+        self.clip_end = kwargs.get('clip_end', True)  # In seconds
 
         # Getting the audio signal
         self.audio_fname = audio_fname
@@ -45,6 +47,19 @@ class audio_sample():
             self.audio = self.audio[good_range[0]:good_range[1]]
         except:
             pass
+
+        # clipping
+        self.audio_thd = 0.05
+        self.beginning_buffer = 1 # in seconds
+        if self.clip_start:
+            clipped_start = np.argmax(self.audio>self.audio_thd) - self.beginning_buffer*self.sampling_rate
+            clipped_start = max(0, clipped_start)
+            self.audio = self.audio[clipped_start:-1]
+
+        if self.clip_end:
+            reversed_audio = self.audio[::-1]
+            clipped_end = len(reversed_audio) - np.argmax(reversed_audio>self.audio_thd) - 1 + self.beginning_buffer*self.sampling_rate
+            self.audio = self.audio[:clipped_end]
 
         # Some parameter that will be defined by signal processing
         self.onset_times = False  # In seconds
@@ -65,6 +80,8 @@ class audio_sample():
         """
         sample_onset = (win_wd + win_gap)*self.sampling_rate
         self.onset_samples = range(0, len(self.audio), sample_onset)
+        # excluding windows that are too close to the beginning
+        self.onset_samples = [x for x in self.onset_samples if x > self.beginning_buffer]
         self.onset_times = [x/self.sampling_rate for x in self.onset_samples]
 
     def find_onsets(self):
@@ -128,15 +145,20 @@ class audio_sample():
 
         # Calculate strokes if requested
         with_strokes = kwargs.get("with_strokes", False)
+        x_axis_type = kwargs.get("x_axis_type", 'time')
+        suggest_start = kwargs.get("suggest_start", False)
         if with_strokes and self.onset_samples is False:
             self.isolate_strokes()
 
         # Plot signal
         nsamples = len(self.audio)
         print nsamples
-        times = np.arange(0, nsamples)/self.sampling_rate
+        x_axis = np.arange(0, nsamples)
+        if x_axis_type == 'time':
+            x_axis = x_axis/self.sampling_rate
         fig = plt.figure()
-        plt.plot(times, self.audio)
+        plt.plot(x_axis, self.audio)
+        plt.xlabel(x_axis_type)
 
         # Add strokes if availables
         if self.onset_samples is not False:
@@ -171,7 +193,7 @@ if __name__=='__main__':
 
     #testaudio.show_signal()
     #testaudio.isolate_strokes()
-    testaudio.set_fake_regular_offsets(2)
-    testaudio.show_signal(with_strokes=True)
+    #testaudio.set_fake_regular_offsets(2)
+    testaudio.show_signal(x_axis_type='sample', suggest_start=True)
     #testaudio.show_strokes()
     #print testaudio.get_features()
