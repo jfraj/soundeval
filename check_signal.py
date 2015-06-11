@@ -1,3 +1,4 @@
+import os
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.style.use('ggplot')
@@ -8,7 +9,18 @@ import stroke_cleaning
 
 colors = itertools.cycle(["r", "b", "g", "k", "c", "m", "y"])
 
-def show_features_from_list(audio_list, label_list=None, good_range_list=None, **kwargs):
+def plot_features_from_audio(audio):
+    """Plot the features from the audio sample object"""
+    feature_dic = audio.get_features()
+    features = feature_dic['feature_table']
+    # Plot
+    plt.scatter(features[:, 0], features[:, 1],
+                color=next(colors), s=70, alpha=0.5)
+    plt.xlabel(feature_dic['feature_names'][0])
+    plt.ylabel(feature_dic['feature_names'][1])
+    plt.grid()
+
+def plot_features_from_list(audio_list, label_list=None, good_range_list=None, **kwargs):
     """Plot features for audio signal in the given list."""
     if good_range_list is None:
         good_range_list = [None]*len(audio_list)
@@ -16,7 +28,6 @@ def show_features_from_list(audio_list, label_list=None, good_range_list=None, *
         label_list = [None]*len(label_list)
     fake_stroke_onset = kwargs.get("fake_stroke_onset", False)
     print('Fake stroke is {}'.format(fake_stroke_onset))
-    fig = plt.figure()
     for iaudiofile, ilabel, igood_range in zip(
             audio_list, label_list, good_range_list):
         iaudio = stroke_cleaning.audio_sample(iaudiofile, igood_range)
@@ -41,6 +52,12 @@ def show_features_from_list(audio_list, label_list=None, good_range_list=None, *
         plt.ylabel(ifeature_dic['feature_names'][1])
     plt.grid()
     plt.legend(loc='best')
+
+
+def show_features_from_list(audio_list, label_list=None, good_range_list=None, **kwargs):
+    """Plot features for audio signal in the given list."""
+    fig = plt.figure()
+    plot_features_from_list(audio_list, label_list, good_range_list, **kwargs)
     fig.show()
     raw_input('press enter when finished...')
 
@@ -111,6 +128,21 @@ def show_players_features():
                                   'goodranges': igoodrangelist}
     show_grouped_features(grouping_dict)
 
+def audio_report(fname):
+    """Plot summary of the given audio file."""
+    audio = stroke_cleaning.audio_sample(fname)
+    audio.set_fake_regular_offsets(1)
+    fig_sig = plt.figure()
+    audio.plot_signal(x_axis_type='sample')
+    fig_sig.show()
+
+    fig_feat = plt.figure()
+    plot_features_from_audio(audio)
+    plt.grid()
+    fig_feat.show()
+    raw_input('press enter when finished...')
+
+
 if __name__ == '__main__':
     #recording_list = (
     #    '/Users/jean-francoisrajotte/myaudio/marina.m4a',
@@ -137,4 +169,7 @@ if __name__ == '__main__':
         'audio_file': '/Users/jean-francoisrajotte/myaudio/marina_20150507_test.m4a',
         'good_range': None}
     #show_features_from_dic(recording_dic)
-    show_players_features()
+    #show_players_features()
+    audio_dir = "/Users/jean-francoisrajotte/myaudio/alto_recordings/"
+    audioname = os.path.join(audio_dir, 'marina_20150513_halfbow_testbow1.m4a')
+    audio_report(audioname)

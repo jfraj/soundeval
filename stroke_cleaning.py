@@ -78,7 +78,7 @@ class audio_sample():
         win_gap : gap length between windows (unit seconds)
 
         """
-        sample_onset = (win_wd + win_gap)*self.sampling_rate
+        sample_onset = int((win_wd + win_gap)*self.sampling_rate)
         self.onset_samples = range(0, len(self.audio), sample_onset)
         # excluding windows that are too close to the beginning
         self.onset_samples = [x for x in self.onset_samples if x > self.beginning_buffer]
@@ -139,14 +139,14 @@ class audio_sample():
         return {'feature_names': feature_names,
                 'feature_table': np.array(features_list)}
 
-    def show_signal(self, **kwargs):
-        """plots the audio signal."""
+    def plot_signal(self, **kwargs):
+        """plot audio signal."""
         # Make signal as time
 
         # Calculate strokes if requested
         with_strokes = kwargs.get("with_strokes", False)
         x_axis_type = kwargs.get("x_axis_type", 'time')
-        suggest_start = kwargs.get("suggest_start", False)
+        #suggest_start = kwargs.get("suggest_start", False)
         if with_strokes and self.onset_samples is False:
             self.isolate_strokes()
 
@@ -156,16 +156,20 @@ class audio_sample():
         x_axis = np.arange(0, nsamples)
         if x_axis_type == 'time':
             x_axis = x_axis/self.sampling_rate
-        fig = plt.figure()
-        plt.plot(x_axis, self.audio)
+        #fig = plt.figure()
+        plt.plot(x_axis, self.audio, color='b')
         plt.xlabel(x_axis_type)
 
         # Add strokes if availables
         if self.onset_samples is not False:
-            for istroke_start in self.onset_times:
+            print('Plotting strokes')
+            onsets = self.onset_samples
+            if x_axis_type == 'time':
+                onsets = self.onset_times
+            for istroke_start in onsets:
                 plt.axvline(istroke_start, color='r')
-        fig.show()
-        raw_input('press enter when finished...')
+        #fig.sow()
+        #raw_input('press enter when finished...')
 
     def show_strokes(self):
         """
@@ -194,6 +198,6 @@ if __name__=='__main__':
     #testaudio.show_signal()
     #testaudio.isolate_strokes()
     #testaudio.set_fake_regular_offsets(2)
-    testaudio.show_signal(x_axis_type='sample', suggest_start=True)
+    testaudio.plot_signal(x_axis_type='sample', suggest_start=True)
     #testaudio.show_strokes()
     #print testaudio.get_features()
