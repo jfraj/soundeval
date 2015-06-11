@@ -41,9 +41,10 @@ class audio_sample():
         self.audio = MonoLoader(filename=audio_fname)()
 
         # Cleaning edges
-        if good_range is None:
-            good_range = (0, len(self.audio))
-        self.audio = self.audio[good_range[0]:good_range[1]]
+        try:
+            self.audio = self.audio[good_range[0]:good_range[1]]
+        except:
+            pass
 
         # Some parameter that will be defined by signal processing
         self.onset_times = False  # In seconds
