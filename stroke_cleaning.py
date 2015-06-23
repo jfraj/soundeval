@@ -141,8 +141,7 @@ class audio_sample():
 
     def plot_signal(self, **kwargs):
         """plot audio signal."""
-        # Make signal as time
-
+        label = kwargs.get('label', None)
         # Calculate strokes if requested
         with_strokes = kwargs.get("with_strokes", False)
         x_axis_type = kwargs.get("x_axis_type", 'time')
@@ -167,7 +166,7 @@ class audio_sample():
             if x_axis_type == 'time':
                 onsets = self.onset_times
             for istroke_start in onsets:
-                plt.axvline(istroke_start, color='r')
+                plt.axvline(istroke_start, color='r', alpha=0.2)
         #fig.sow()
         #raw_input('press enter when finished...')
 
@@ -192,12 +191,15 @@ if __name__=='__main__':
     #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/sustainedG_shoulder_rest_ON.m4a')
     #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/sustainedG_shoulder_rest_OFF.m4a')
     #testaudio = audio_sample('/Users/jean-francoisrajotte/myaudio/marina_20150507_test.m4a')
-    fname = os.path.join(audio_dir, 'marina_20150513_halfbow_testbow1.m4a')
+    fname = os.path.join(audio_dir, 'jfraj_marcmalobowtest2_20150610b.m4a')
     testaudio = audio_sample(fname, stroke_length=0.5)
 
     #testaudio.show_signal()
     #testaudio.isolate_strokes()
     #testaudio.set_fake_regular_offsets(2)
-    testaudio.plot_signal(x_axis_type='sample', suggest_start=True)
+    fig = plt.figure()
+    testaudio.plot_signal(x_axis_type='sample')
+    fig.show()
+    raw_input('ok...')
     #testaudio.show_strokes()
     #print testaudio.get_features()

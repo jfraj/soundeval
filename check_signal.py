@@ -5,6 +5,9 @@ matplotlib.style.use('ggplot')
 import itertools
 import pandas as pd
 import numpy as np
+from datetime import datetime
+
+# This project
 import stroke_cleaning
 
 colors = itertools.cycle(["r", "b", "g", "k", "c", "m", "y"])
@@ -25,7 +28,7 @@ def plot_features_from_list(audio_list, label_list=None, good_range_list=None, *
     if good_range_list is None:
         good_range_list = [None]*len(audio_list)
     if label_list is None:
-        label_list = [None]*len(label_list)
+        label_list = [os.path.basename(x) for x in audio_list]
     fake_stroke_onset = kwargs.get("fake_stroke_onset", False)
     print('Fake stroke is {}'.format(fake_stroke_onset))
     for iaudiofile, ilabel, igood_range in zip(
@@ -142,6 +145,50 @@ def audio_report(fname):
     fig_feat.show()
     raw_input('press enter when finished...')
 
+def show_day(daystr):
+    """Show summary of all the audiofile from a given day."""
+    df_data = pd.read_csv('datainfo.csv', sep=' ', na_values='None',
+                          dtype={'date': datetime})
+    fnames = df_data[df_data.date==daystr].path.tolist()
+    good_ranges = df_data[df_data.date==daystr].goodrange.tolist()
+    #print(fnames)
+    fig_feat = plt.figure(1)
+    fig_raw = plt.figure(2)
+    #plot_features_from_list(fnames, fake_stroke_onset=1)
+    #plt.title(daystr)
+    #fig_feat.show()
+
+    for idx, (iaudiofile, igood_range) in enumerate(zip(fnames, good_ranges)):
+        print(igood_range)
+        try:
+            igood_range = igood_range.split('-')
+            igood_range = (int(igood_range[0]), int(igood_range[1]))
+        except AttributeError:
+            igood_range = None
+        print(igood_range)
+        iaudio = stroke_cleaning.audio_sample(iaudiofile, igood_range)
+        ilabel = os.path.basename(iaudiofile)
+        iaudio.set_fake_regular_offsets(0.5)
+        # Features
+        ifeature_dic = iaudio.get_features()
+        plt.figure(2)
+        iax = fig_raw.add_subplot(len(fnames),1,idx)
+        iaudio.plot_signal(label=os.path.basename(iaudiofile).split('.')[0])
+        iax.text(0.05, 0.95, ilabel,
+                 verticalalignment='top', horizontalalignment='left',
+                 transform=iax.transAxes, fontsize=15)
+
+        ifeatures = ifeature_dic['feature_table']
+        plt.figure(1)
+        plt.scatter(ifeatures[:, 0], ifeatures[:, 1],
+                    color=next(colors), s=70, label=ilabel, alpha=0.5)
+        plt.xlabel(ifeature_dic['feature_names'][0])
+        plt.ylabel(ifeature_dic['feature_names'][1])
+        plt.legend(loc='best')
+
+    fig_feat.show()
+    fig_raw.show()
+    raw_input('press enter when finished...')
 
 if __name__ == '__main__':
     #recording_list = (
@@ -170,6 +217,7 @@ if __name__ == '__main__':
         'good_range': None}
     #show_features_from_dic(recording_dic)
     #show_players_features()
-    audio_dir = "/Users/jean-francoisrajotte/myaudio/alto_recordings/"
-    audioname = os.path.join(audio_dir, 'marina_20150513_halfbow_testbow1.m4a')
-    audio_report(audioname)
+    #audio_dir = "/Users/jean-francoisrajotte/myaudio/alto_recordings/"
+    #audioname = os.path.join(audio_dir, 'marina_20150513_halfbow_testbow1.m4a')
+    #audio_report(audioname)
+    show_day('20150610')
