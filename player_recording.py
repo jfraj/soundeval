@@ -17,7 +17,17 @@ def record_playing(**kwargs):
     rec.start_record(savename=save_name)
     if show_audio:
         check_signal.audio_report(save_name)
+    return save_name
 
+def multi_recording(**kwargs):
+    """Record multiple audio signal and save them."""
+    file_list = []
+    while True:
+        if raw_input('Another one?') not in ('y', 'Y', 'yes', 'Yes', 'YES'):
+            break
+        file_list.append(record_playing())
+    check_signal.show_multiaudio(file_list)
 
 if __name__ == "__main__":
-    record_playing(show_audio=True)
+    #record_playing(show_audio=True)
+    multi_recording()

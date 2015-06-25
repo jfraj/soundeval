@@ -145,18 +145,13 @@ def audio_report(fname):
     fig_feat.show()
     raw_input('press enter when finished...')
 
-def show_day(daystr):
-    """Show summary of all the audiofile from a given day."""
-    df_data = pd.read_csv('datainfo.csv', sep=' ', na_values='None',
-                          dtype={'date': datetime})
-    fnames = df_data[df_data.date==daystr].path.tolist()
-    good_ranges = df_data[df_data.date==daystr].goodrange.tolist()
-    #print(fnames)
+def show_multiaudio(fnames, good_ranges = None):
+    """Show summary of all the audio files in the given list."""
+
+    if good_ranges is None:
+        good_ranges = [None]*len(fnames)
     fig_feat = plt.figure(1)
     fig_raw = plt.figure(2)
-    #plot_features_from_list(fnames, fake_stroke_onset=1)
-    #plt.title(daystr)
-    #fig_feat.show()
 
     for idx, (iaudiofile, igood_range) in enumerate(zip(fnames, good_ranges)):
         print(igood_range)
@@ -189,6 +184,15 @@ def show_day(daystr):
     fig_feat.show()
     fig_raw.show()
     raw_input('press enter when finished...')
+
+def show_day(daystr):
+    """Show summary of all the audiofile from a given day."""
+    df_data = pd.read_csv('datainfo.csv', sep=' ', na_values='None',
+                          dtype={'date': datetime})
+    fnames = df_data[df_data.date==daystr].path.tolist()
+    good_ranges = df_data[df_data.date==daystr].goodrange.tolist()
+
+    show_multiaudio(fnames, good_ranges)
 
 if __name__ == '__main__':
     #recording_list = (
