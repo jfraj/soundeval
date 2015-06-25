@@ -220,4 +220,4 @@ if __name__ == '__main__':
     #audio_dir = "/Users/jean-francoisrajotte/myaudio/alto_recordings/"
     #audioname = os.path.join(audio_dir, 'marina_20150513_halfbow_testbow1.m4a')
     #audio_report(audioname)
-    show_day('20150610')
+    show_day('20150623')
