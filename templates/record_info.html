@@ -1,0 +1,26 @@
+<html>
+<!--  <head>
+    <title>Recording Info</title>
+  </head>
+-->
+  <body>
+    <p>Playing information</p>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>Who is playing?</p>
+        <p>
+          {% for option in form.player_name %}
+            {{ option }} {{ option.label }}<br>
+          {% endfor %}
+        </p>
+        <p>Play type?</p>
+        <p>
+          {% for option in form.play_type %}
+            {{ option }} {{ option.label }}<br>
+          {% endfor %}
+        </p>
+        <p>{{ form.max_length.label }} {{ form.max_length(size=5) }} {% for error in form.max_length.errors %}[{{ error }}]{% endfor %}</p>
+        {{ form.submit }}
+    </form>
+  </body>
+</html>
