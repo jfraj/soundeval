@@ -109,7 +109,14 @@ class audio_sample():
         self.strokes = np.array(
             [self.audio[i:i+frame_sz] for i in self.onset_samples])
 
+    def isGoodFrame(self, frame):
+        """True if frame passes some quality test."""
+        if max(frame)<0.1:
+            return False
+        return True
+
     def extract_features_from_frame(self, frame):
+        """ Return dictionary of features for the given frame."""
         centroid = Centroid(range=22050)
         hamming_window = Windowing(type='hamming')
         zcr = ess.ZeroCrossingRate()
@@ -118,7 +125,6 @@ class audio_sample():
         if len(frame) % 2 == 1:
             frame = frame[:-1]
         spectral_magnitude = spectrum(hamming_window(frame))
-        #return [zcr(frame), centroid(spectral_magnitude)]
         return {'zrc':zcr(frame), 'centroid':centroid(spectral_magnitude)}
 
     def get_features(self):
@@ -126,11 +132,11 @@ class audio_sample():
         if self.strokes is False:
             print('Isolating strokes')
             self.isolate_strokes()
-        #feature_table = np.array(
-        #    [self.extract_features_from_frame(stroke) for stroke in self.strokes])
         feature_names = ('zrc', 'centroid')
         features_list = []
         for istroke in self.strokes:
+            if not self.isGoodFrame(istroke):
+                continue
             ifeature_dic = self.extract_features_from_frame(istroke)
             ifeature_list = []
             for ifeature in feature_names:
@@ -145,7 +151,6 @@ class audio_sample():
         # Calculate strokes if requested
         with_strokes = kwargs.get("with_strokes", False)
         x_axis_type = kwargs.get("x_axis_type", 'time')
-        #suggest_start = kwargs.get("suggest_start", False)
         if with_strokes and self.onset_samples is False:
             self.isolate_strokes()
 
@@ -155,7 +160,6 @@ class audio_sample():
         x_axis = np.arange(0, nsamples)
         if x_axis_type == 'time':
             x_axis = x_axis/self.sampling_rate
-        #fig = plt.figure()
         plt.plot(x_axis, self.audio, color='b')
         plt.xlabel(x_axis_type)
 
@@ -165,10 +169,10 @@ class audio_sample():
             onsets = self.onset_samples
             if x_axis_type == 'time':
                 onsets = self.onset_times
-            for istroke_start in onsets:
+            for istroke_start, istroke in zip(onsets, self.strokes):
+                if not self.isGoodFrame(istroke):
+                    continue
                 plt.axvline(istroke_start, color='r', alpha=0.2)
-        #fig.sow()
-        #raw_input('press enter when finished...')
 
     def show_strokes(self):
         """
