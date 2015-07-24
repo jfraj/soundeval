@@ -49,6 +49,10 @@ def record_info():
     return render_template('record_info.html', form=form)
 
 
+@app.errorhandler(404)
+def runtime_error(e):
+    return render_template('error.html', error=str(e))
+
 @app.route('/test/')
 def test_page():
     return 'This is a test page'
