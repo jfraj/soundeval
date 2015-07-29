@@ -12,15 +12,24 @@ import stroke_cleaning
 
 colors = itertools.cycle(["r", "b", "g", "k", "c", "m", "y"])
 
-def plot_features_from_audio(audio):
+
+#def plot_features_from_audio(audio, featuresXY=('zrc', 'centroid')):
+def plot_features_from_audio(audio, featuresXY=('cm0', 'sm0')):
     """Plot the features from the audio sample object"""
     feature_dic = audio.get_features()
     features = feature_dic['feature_table']
+    xfeat, yfeat = featuresXY
+    # Index of features
+    xidx = feature_dic['feature_names'].index(xfeat)
+    yidx = feature_dic['feature_names'].index(yfeat)
+
     # Plot
-    plt.scatter(features[:, 0], features[:, 1],
+    plt.scatter(features[:, xidx], features[:, yidx],
                 color=next(colors), s=70, alpha=0.5)
-    plt.xlabel(feature_dic['feature_names'][0])
-    plt.ylabel(feature_dic['feature_names'][1])
+    #plt.xlabel(feature_dic['feature_names'][0])
+    #plt.ylabel(feature_dic['feature_names'][1])
+    plt.xlabel(xfeat)
+    plt.ylabel(yfeat)
     plt.grid()
 
 def plot_features_from_list(audio_list, label_list=None, good_range_list=None, **kwargs):
@@ -145,8 +154,10 @@ def audio_report(fname):
     fig_feat.show()
     raw_input('press enter when finished...')
 
-def show_multiaudio(fnames, good_ranges = None):
+def show_multiaudio(fnames, good_ranges = None, **kwargs):
     """Show summary of all the audio files in the given list."""
+    featuresXY = kwargs.get('featuresXY',('zrc', 'centroid'))
+    xfeat, yfeat = featuresXY
 
     if good_ranges is None:
         good_ranges = [None]*len(fnames)
@@ -164,8 +175,13 @@ def show_multiaudio(fnames, good_ranges = None):
         iaudio = stroke_cleaning.audio_sample(iaudiofile, igood_range)
         ilabel = os.path.basename(iaudiofile)
         iaudio.set_fake_regular_offsets(0.5)
+
         # Features
         ifeature_dic = iaudio.get_features()
+        # Index of features
+        xidx = ifeature_dic['feature_names'].index(xfeat)
+        yidx = ifeature_dic['feature_names'].index(yfeat)
+
         plt.figure(2)
         iax = fig_raw.add_subplot(len(fnames),1,idx)
         iaudio.plot_signal(label=os.path.basename(iaudiofile).split('.')[0])
@@ -175,24 +191,27 @@ def show_multiaudio(fnames, good_ranges = None):
 
         ifeatures = ifeature_dic['feature_table']
         plt.figure(1)
-        plt.scatter(ifeatures[:, 0], ifeatures[:, 1],
+        plt.scatter(ifeatures[:, xidx], ifeatures[:, yidx],
                     color=next(colors), s=70, label=ilabel, alpha=0.5)
-        plt.xlabel(ifeature_dic['feature_names'][0])
-        plt.ylabel(ifeature_dic['feature_names'][1])
+        plt.xlabel(xfeat)
+        plt.ylabel(yfeat)
         plt.legend(loc='best')
 
     fig_feat.show()
     fig_raw.show()
     raw_input('press enter when finished...')
 
-def show_day(daystr):
+
+def show_day(daystr, **kwargs):
     """Show summary of all the audiofile from a given day."""
+    featuresXY = kwargs.get('featuresXY', ('zrc', 'centroid'))
+
     df_data = pd.read_csv('datainfo.csv', sep=' ', na_values='None',
                           dtype={'date': datetime})
-    fnames = df_data[df_data.date==daystr].path.tolist()
-    good_ranges = df_data[df_data.date==daystr].goodrange.tolist()
+    fnames = df_data[df_data.date == daystr].path.tolist()
+    good_ranges = df_data[df_data.date == daystr].goodrange.tolist()
 
-    show_multiaudio(fnames, good_ranges)
+    show_multiaudio(fnames, good_ranges, featuresXY=featuresXY)
 
 if __name__ == '__main__':
     #recording_list = (
@@ -224,4 +243,4 @@ if __name__ == '__main__':
     #audio_dir = "/Users/jean-francoisrajotte/myaudio/alto_recordings/"
     #audioname = os.path.join(audio_dir, 'marina_20150513_halfbow_testbow1.m4a')
     #audio_report(audioname)
-    show_day('20150623')
+    show_day('20150623', featuresXY=('cm3', 'sm0'))

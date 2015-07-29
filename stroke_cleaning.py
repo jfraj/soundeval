@@ -121,18 +121,34 @@ class audio_sample():
         hamming_window = Windowing(type='hamming')
         zcr = ess.ZeroCrossingRate()
         spectrum = ess.Spectrum()
+        central_moments = ess.CentralMoments()
         # Spectrum can only compute FFT of array of even size (don't know why)
         if len(frame) % 2 == 1:
             frame = frame[:-1]
         spectral_magnitude = spectrum(hamming_window(frame))
-        return {'zrc':zcr(frame), 'centroid':centroid(spectral_magnitude)}
+        feat_dic = {'zrc':zcr(frame), 'centroid':centroid(spectral_magnitude)}
+
+        # Central moments
+        central_moments = ess.CentralMoments()
+        central_moms = central_moments(hamming_window(frame))
+        for idx, icm in enumerate(central_moms):
+            feat_dic['cm{}'.format(idx)] = icm
+
+        # Distribution shape
+        distributionshape = ess.DistributionShape()
+        for idx, ism in enumerate(distributionshape(central_moms)):
+            feat_dic['sm{}'.format(idx)] = ism
+        return feat_dic
 
     def get_features(self):
         """Return a feature table from the strokes."""
         if self.strokes is False:
             print('Isolating strokes')
             self.isolate_strokes()
-        feature_names = ('zrc', 'centroid')
+        # List of features to use (sm1 omitted because always nan)
+        feature_names = ('zrc', 'centroid',
+                         'cm0', 'cm1', 'cm2', 'cm3', 'cm4',
+                         'sm0', 'sm2')
         features_list = []
         for istroke in self.strokes:
             if not self.isGoodFrame(istroke):
@@ -206,4 +222,4 @@ if __name__=='__main__':
     fig.show()
     raw_input('ok...')
     #testaudio.show_strokes()
-    #print testaudio.get_features()
+    print testaudio.get_features()
