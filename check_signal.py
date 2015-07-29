@@ -39,6 +39,9 @@ def plot_features_from_list(audio_list, label_list=None, good_range_list=None, *
     if label_list is None:
         label_list = [os.path.basename(x) for x in audio_list]
     fake_stroke_onset = kwargs.get("fake_stroke_onset", False)
+    featuresXY = kwargs.get('featuresXY', ('zrc', 'centroid'))
+    xfeat, yfeat = featuresXY
+
     print('Fake stroke is {}'.format(fake_stroke_onset))
     for iaudiofile, ilabel, igood_range in zip(
             audio_list, label_list, good_range_list):
@@ -57,11 +60,15 @@ def plot_features_from_list(audio_list, label_list=None, good_range_list=None, *
         print('features shape: {}'.format(ifeatures.shape))
         del(iaudio)
 
+        # Index of features
+        xidx = ifeature_dic['feature_names'].index(xfeat)
+        yidx = ifeature_dic['feature_names'].index(yfeat)
+
         # Plot
-        plt.scatter(ifeatures[:, 0], ifeatures[:, 1],
+        plt.scatter(ifeatures[:, xidx], ifeatures[:, yidx],
                     color=next(colors), s=70, label=ilabel, alpha=0.5)
-        plt.xlabel(ifeature_dic['feature_names'][0])
-        plt.ylabel(ifeature_dic['feature_names'][1])
+        plt.xlabel(xfeat)
+        plt.ylabel(yfeat)
     plt.grid()
     plt.legend(loc='best')
 
@@ -96,8 +103,11 @@ def get_features_from_path_list(path_list, goodrange_list, **kwargs):
     return feature_dic
 
 
-def show_grouped_features(group_dict):
+def show_grouped_features(group_dict, **kwargs):
     """Plot the features from the group"""
+    featuresXY = kwargs.get('featuresXY', ('zrc', 'centroid'))
+    xfeat, yfeat = featuresXY
+
     fig = plt.figure()
     for igroup in group_dict.keys():
         ifeature_dic =\
@@ -106,11 +116,15 @@ def show_grouped_features(group_dict):
         ifeatures = ifeature_dic['feature_table']
         print('features shape: {}'.format(ifeatures.shape))
 
+        # Index of features
+        xidx = ifeature_dic['feature_names'].index(xfeat)
+        yidx = ifeature_dic['feature_names'].index(yfeat)
+
         # Plot
-        plt.scatter(ifeatures[:, 0], ifeatures[:, 1],
+        plt.scatter(ifeatures[:, xidx], ifeatures[:, yidx],
                     color=next(colors), s=70, label=igroup, alpha=0.5)
-        plt.xlabel(ifeature_dic['feature_names'][0])
-        plt.ylabel(ifeature_dic['feature_names'][1])
+        plt.xlabel(xfeat)
+        plt.ylabel(yfeat)
     plt.grid()
     plt.legend(loc='best')
     fig.show()
@@ -128,7 +142,7 @@ def show_features_from_dic(audio_dic, **kwargs):
         good_range_list.append(idic['good_range'])
     show_features_from_list(recording_list, label_list, good_range_list, **kwargs)
 
-def show_players_features():
+def show_players_features(**kwargs):
     """Plot the features grouped by file selection"""
     df_data = pd.read_csv('datainfo.csv', sep=' ', na_values='None')
     print(df_data.head())
@@ -138,7 +152,7 @@ def show_players_features():
         igoodrangelist = df_data[df_data.player==iplayer]['goodrange'].tolist()
         grouping_dict[iplayer] = {'paths': ipathlist,
                                   'goodranges': igoodrangelist}
-    show_grouped_features(grouping_dict)
+    show_grouped_features(grouping_dict, **kwargs)
 
 def audio_report(fname):
     """Plot summary of the given audio file."""
@@ -239,8 +253,8 @@ if __name__ == '__main__':
         'audio_file': '/Users/jean-francoisrajotte/myaudio/marina_20150507_test.m4a',
         'good_range': None}
     #show_features_from_dic(recording_dic)
-    #show_players_features()
+    show_players_features(featuresXY=('cm3', 'sm0'))
     #audio_dir = "/Users/jean-francoisrajotte/myaudio/alto_recordings/"
     #audioname = os.path.join(audio_dir, 'marina_20150513_halfbow_testbow1.m4a')
     #audio_report(audioname)
-    show_day('20150623', featuresXY=('cm3', 'sm0'))
+    #show_day('20150623', featuresXY=('cm3', 'sm0'))
